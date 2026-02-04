@@ -49,6 +49,15 @@ nodejs_setup(){
     VALIDATE $? "Install dependencies"
 }
 
+java_setup(){
+    dnf install maven -y &>>$LOG_FILE
+    VALIDATE $? "Installing Maven"
+    mvn clean package &>>$LOG_FILE
+    VALIDATE $? "Clean the package"
+    mv target/shipping-1.0.jar shipping.jar
+    VALIDATE $? "Move the file"   
+}
+
 rabbitmq_setup(){
     cp $SCRIPT_DIR/rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo &>>$LOG_FILE
     VALIDATE $? "Adding RabbitMQ repo"

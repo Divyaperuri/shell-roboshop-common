@@ -37,6 +37,48 @@ VALIDATE(){ #functions receive the i/p's through args just like shell script arg
     fi
 }
 
+nodejs_setup(){
+    dnf module disable nodejs -y &>>$LOG_FILE
+    VALIDATE $? "Disabling NodeJS"
+    dnf module enable nodejs:20 -y  &>>$LOG_FILE
+    VALIDATE $? "Enabling NodeJS 20"
+    dnf install nodejs -y &>>$LOG_FILE
+    VALIDATE $? "Installing NodeJS" 
+
+    npm install &>>$LOG_FILE
+    VALIDATE $? "Install dependencies"
+}
+
+app_setup(){
+    mkdir -p /app
+    VALIDATE $? "Creating app directory"
+
+    curl -o /tmp/$app_name.zip https://roboshop-artifacts.s3.amazonaws.com/$app_name-v3.zip &>>$LOG_FILE
+    VALIDATE $? "Downloading $app_name application"
+
+    cd /app 
+    VALIDATE $? "Changing to app directory"
+
+    rm -rf /app/*
+    VALIDATE $? "Removing existing code"
+
+    unzip /tmp/$app_name.zip &>>$LOG_FILE
+    VALIDATE $? "unzip $app_name"
+}
+
+systemd_setup(){
+    cp $SCRIPT_DIR/$app_name.service /etc/systemd/system/$app_name.service
+    VALIDATE $? "Copy systemctl service"
+
+    systemctl daemon-reload
+    systemctl enable $app_name &>>$LOG_FILE
+    VALIDATE $? "Enable $app_name"
+}
+
+app_restart(){
+        systemctl restart $app_name
+    VALIDATE $? "Restart the $app_name"
+}
 print_time(){
     END_TIME=$(date +%s)
     TOTAL_TIME=$(($END_TIME - $START_TIME))

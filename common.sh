@@ -50,7 +50,7 @@ nodejs_setup(){
 }
 
 rabbitmq_setup(){
-        cp $SCRIPT_DIR/rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo &>>$LOG_FILE
+    cp $SCRIPT_DIR/rabbitmq.repo /etc/yum.repos.d/rabbitmq.repo &>>$LOG_FILE
     VALIDATE $? "Adding RabbitMQ repo"
     dnf install rabbitmq-server -y &>>$LOG_FILE
     VALIDATE $? "Installing RabbitMQ Server"
@@ -61,7 +61,14 @@ rabbitmq_setup(){
     rabbitmqctl add_user roboshop roboshop123 &>>$LOG_FILE
     rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" &>>$LOG_FILE
     VALIDATE $? "Setting up permissions"
-    }
+}
+
+python_setup(){
+    dnf install python3 gcc python3-devel -y &>>$LOG_FILE
+    VALIDATE $? "Installing the Python3"
+    pip3 install -r requirements.txt &>>$LOG_FILE
+    VALIDATE $? "Install the requirements"
+}
 
 app_setup(){
     mkdir -p /app
